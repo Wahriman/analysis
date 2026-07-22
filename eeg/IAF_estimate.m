@@ -1,11 +1,11 @@
 
-                   
-function [paf,psd,f] = IAF_estimate(data_path,labnum,subnum,sampling_rate)
+function [paf,psd,f] = IAF_estimate(data_path,labnum,subnum,sampling_rate,line_freq)
 
 %% Input: data_path: the path where we store the Data, e.g., 'Z\Data'
 %         labnum: ID of the lab, must be numeric
 %         subnum: ID of the subject, must be numeric
 %         sampling_rate: EEG sampling rate in Hz, must be numeric
+%         line_freq: mains line noise frequency in Hz, must be 50 or 60
 
 %% Output: paf: peak alpha frequency
 %           where paf(1) is the PAF of pre eyes-closed EEG recording
@@ -25,7 +25,23 @@ function [paf,psd,f] = IAF_estimate(data_path,labnum,subnum,sampling_rate)
 % This function includes loading the EEG data part, preprocessing part and IAF estimation part. I primarily used 
 % the function named 'restingIAF' from Corcoran (2018) in the IAF estimation part
 % the script has been written by Yifan Shen (University of Glasogw, 3032397S@student.gla.ac.uk;
-% and modified by Simon Hanslmayr (University of Glasgow, simon.hanslmayr@glasgow.ac.uk
+% and modified by Simon Hanslmayr (University of Glasgow, simon.hanslmayr@glasgow.ac.uk)
+% and modified by others
+
+%% CHANGES
+% 2026 - Matthias Will: added automatic detection of EEG data format,
+%         using the corresponding EEGLAB function to load it. Tested
+%         with BrainVision, BDF and EDF format files.
+% 2026 - Ines Violante: notch filter frequency is now user-selectable via the
+%         'line_freq' argument (50 Hz or 60 Hz).
+
+%% Validate line_freq
+if nargin < 5 || isempty(line_freq)
+    error('line_freq must be specified as either 50 or 60 (Hz).');
+end
+if ~isnumeric(line_freq) || ~ismember(line_freq, [50 60])
+    error('line_freq must be numeric and equal to 50 or 60 (Hz).');
+end
 
 %% Add necessary packages
 addpath(genpath('restingIAF-master'));
@@ -66,22 +82,47 @@ for i=1:4
 
 % read the EEG data
 p = fullfile(data_path, prefix);
-vhdr = [File_names{i} '.vhdr'];
 
-if ~exist(fullfile(p, vhdr), 'file')
-    p = fullfile(data_path, ['sub-' prefix], 'eeg');
-    vhdr = ['sub-' File_names{i} '.vhdr'];
+% check if is a directory, add "sub-" if not
+if ~isfolder(p)
+    p = fullfile(data_path, ['sub-' prefix]);
+    File_names{i} = ['sub-' File_names{i}];
 end
 
-EEG = pop_loadbv(p, vhdr);
+% add EEG subdirectory
+p = fullfile(p, '\eeg\');
 
-std_EEG = std(EEG.data);
+% read filenames and parse format
+fname = dir(p);
+fname = {fname(3:end).name};
+
+if any(contains(fname, '.vhdr'))
+
+    EEG = pop_loadbv(p, [File_names{i}, '.vhdr']);
+
+elseif any(contains(fname, '.bdf'))
+
+    EEG = pop_biosig([p File_names{i} '.bdf']);
+
+elseif any(contains(fname, '.edf'))
+
+    EEG = pop_biosig([p File_names{i} '.edf']);
+    
+else
+
+    error('No valid EEG dataset found under this path');
+
+end
+
 std_EEG = std(EEG.data);
 
 
 % Filtering
 EEG = pop_eegfiltnew(EEG, 1, 40);
-EEG = pop_eegfiltnew(EEG, 49, 51, [], 1);  
+
+% Notch filter to remove mains line noise (50 or 60 Hz, user-selected)
+EEG = pop_eegfiltnew(EEG, line_freq-1, line_freq+1, [], 1);
+
 
 % divide into 1s Epochs
 epoch_length_sec = 1;
@@ -166,8 +207,3 @@ psd(i,:) = paf_sums.ps;
 %end
 
 end
-
-
-
-
-

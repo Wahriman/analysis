@@ -1,8 +1,15 @@
-function extractIAF(data_path,labnum, subnum,sampling_rate);
+function extractIAF(data_path,labnum, subnum,sampling_rate,line_freq);
 
 %% this function will extract IAF for participants and store the resulting value in metadata; 
 % it also plots a summary figure at the end with the individual power
 % spectra and an average across participants
+
+%% CHANGES
+% 2026 - Matthias Will: fixed a bug in the summary plot where the pre
+%         stimulation spectra were plotted for both pre and post.
+% 2026 - Ines Violante: added 'line_freq' input, passed through to
+%         IAF_estimate, so the notch filter frequency is user-selectable
+%         (50 Hz or 60 Hz).
 
 % input
 %addpath('D:\code\scripts_yifan');
@@ -10,11 +17,12 @@ function extractIAF(data_path,labnum, subnum,sampling_rate);
 %subnum=[1:2 5:22]; (must be numeric)
 %subnum=7; (must be numeric)
 %sampling_rate =500; (EEG sampling rate)
+%line_freq =50; (mains line noise frequency, 50 or 60 Hz)
 %data_path='D:\data';
 
 figure;
 for n=1:length(subnum)
-    [paf,psd,f]=IAF_estimate(data_path,labnum,subnum(n),sampling_rate);
+    [paf,psd,f]=IAF_estimate(data_path,labnum,subnum(n),sampling_rate,line_freq);
     iaf(n,:)=paf;
     sub=subnum(n);
     % Import the Excel file
@@ -114,12 +122,12 @@ hold off
 subplot(2,1,2);
 cols=['b' 'r'];
 for k=1:2
-    plot(f, mean_PS_pre(k,:), cols(k), 'LineWidth', 2); hold on;
+    plot(f, mean_PS_post(k,:), cols(k), 'LineWidth', 2); hold on;
     
     % Shaded area for ±SE
     x = f;
-    y1 = mean_PS_pre(k,:) - mnse_PS_pre(k,:);
-    y2 = mean_PS_pre(k,:) + mnse_PS_pre(k,:);
+    y1 = mean_PS_post(k,:) - mnse_PS_post(k,:);
+    y2 = mean_PS_post(k,:) + mnse_PS_post(k,:);
     fill([x', fliplr(x')], [y1, fliplr(y2)], cols(k), 'FaceAlpha', 0.3, 'EdgeColor', 'none');
     
     xlabel('Frequency (Hz)');
@@ -131,9 +139,3 @@ end
 legend('Mean EC', '±SE EC', 'Mean EO', '±SE EO');
 hold off
 title('Post');
-
-
-
-
-
-

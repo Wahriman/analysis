@@ -8,7 +8,7 @@
 + 2<sup>nd</sup> version by Giuseppe Di Dona: <code>tACSChallenge_AnalyzeStaircase.m</code>
 + 3<sup>rd</sup> version by Wahriman Andrade de Araújo: <code>Get_staircase.m</code>
 
-The new script adds the used Base Brightness (variable <code>a</code> in the tACS Challenge GUI) and the Target Brightness (variable <code>b</code> in the tACS Challenge GUI).
+The new script adds the used Base Brightness (variable <code>a</code> in the tACS Challenge GUI) and Target Brightness (variable <code>b</code> in the tACS Challenge GUI) in the graph and table.
 
 **Output example:**
 <img width="1344" height="808" alt="sub-L19_S01_StaircaseResults_DATE_15_09_2026_12_45_31" src="https://github.com/user-attachments/assets/c4d4a512-7025-474f-b1a0-b8e41aef859a" />

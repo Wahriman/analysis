@@ -33,7 +33,8 @@ function swap_left_right_buttons_press(data_path, lab_num, sub_num)
 %   before it is modified, and a file that already has a backup is SKIPPED,
 %   so running this function twice cannot silently swap the data back. To
 %   redo a file, delete its backup copy. Set MAKE_BACKUP = false to disable.
-
+% ------------------------------------------------------------------------
+% Script by Wahriman Andrade de Araújo.
 % ------------------------------ settings --------------------------------
 N_BLOCKS       = 13;                           % B1 ... B13
 MAKE_BACKUP    = true;                         % keep a copy of the original

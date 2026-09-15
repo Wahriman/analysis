@@ -15,7 +15,7 @@ The new script adds the used Base Brightness (variable <code>a</code> in the tAC
 
 <h3>swap_left_right_buttons_press.m</h3>
 
-This script swaps the values of the variables <code>LeftButton</code> and <code>RightButton</code> inside the designated block files (e.g., <code>sub-L19_S01_B1_Sh_2026_03_03_14_32_06.tsv</code>).
+This script swaps the values of the variables <code>LeftButton</code> and <code>RightButton</code> inside the designated block files (e.g., <code>sub-L19_S01_B1_Sh_2026_03_03_14_32_06.tsv</code>). In addition, it creates a backup of the original files before the swap.
 
 **Why?**
 
